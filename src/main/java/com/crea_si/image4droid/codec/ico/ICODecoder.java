@@ -7,20 +7,20 @@
  * and open the template in the editor.
  */
 
-package net.sf.image4j.codec.ico;
+package com.crea_si.image4droid.codec.ico;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.Log;
 
-import net.sf.image4j.codec.bmp.BMPConstants;
-import net.sf.image4j.codec.bmp.BMPDecoder;
-import net.sf.image4j.codec.bmp.ColorEntry;
-import net.sf.image4j.codec.bmp.InfoHeader;
-import net.sf.image4j.io.CountingInputStream;
-import net.sf.image4j.io.EndianUtils;
-import net.sf.image4j.io.LittleEndianInputStream;
+import com.crea_si.image4droid.codec.bmp.BMPConstants;
+import com.crea_si.image4droid.codec.bmp.BMPDecoder;
+import com.crea_si.image4droid.codec.bmp.ColorEntry;
+import com.crea_si.image4droid.codec.bmp.InfoHeader;
+import com.crea_si.image4droid.io.CountingInputStream;
+import com.crea_si.image4droid.io.EndianUtils;
+import com.crea_si.image4droid.io.LittleEndianInputStream;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;

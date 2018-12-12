@@ -1,4 +1,4 @@
-package net.sf.image4j.io;
+package com.crea_si.image4droid.io;
 
 import java.io.DataInput;
 

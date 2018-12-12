@@ -7,9 +7,10 @@
  * and open the template in the editor.
  */
 
-package net.sf.image4j.codec.bmp;
+package com.crea_si.image4droid.codec.bmp;
 
-import net.sf.image4j.io.LittleEndianInputStream;
+
+import com.crea_si.image4droid.io.LittleEndianInputStream;
 
 import java.io.IOException;
 

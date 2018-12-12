@@ -7,12 +7,13 @@
  * and open the template in the editor.
  */
 
-package net.sf.image4j.codec.bmp;
+package com.crea_si.image4droid.codec.bmp;
+
+import com.crea_si.image4droid.io.LittleEndianInputStream;
+import com.crea_si.image4droid.io.LittleEndianOutputStream;
 
 import java.io.IOException;
 
-import net.sf.image4j.io.LittleEndianInputStream;
-import net.sf.image4j.io.LittleEndianOutputStream;
 
 /**
  * Represents a bitmap <tt>InfoHeader</tt> structure, which provides header information.

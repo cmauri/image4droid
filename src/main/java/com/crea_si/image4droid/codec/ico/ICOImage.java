@@ -7,12 +7,12 @@
  * and open the template in the editor.
  */
 
-package net.sf.image4j.codec.ico;
+package com.crea_si.image4droid.codec.ico;
 
 import android.graphics.Bitmap;
 
-import net.sf.image4j.codec.bmp.BMPImage;
-import net.sf.image4j.codec.bmp.InfoHeader;
+import com.crea_si.image4droid.codec.bmp.BMPImage;
+import com.crea_si.image4droid.codec.bmp.InfoHeader;
 
 /**
  * Contains a decoded ICO image, as well as information about the source encoded ICO image.

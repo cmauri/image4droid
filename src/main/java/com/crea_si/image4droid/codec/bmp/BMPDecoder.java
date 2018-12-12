@@ -4,13 +4,13 @@
  * @author Ian McDonagh
  */
 
-package net.sf.image4j.codec.bmp;
+package com.crea_si.image4droid.codec.bmp;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
-import net.sf.image4j.io.CountingInputStream;
-import net.sf.image4j.io.LittleEndianInputStream;
+import com.crea_si.image4droid.io.CountingInputStream;
+import com.crea_si.image4droid.io.LittleEndianInputStream;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;

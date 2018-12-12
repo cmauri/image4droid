@@ -1,8 +1,9 @@
-package net.sf.image4j.codec.ico;
+package com.crea_si.image4droid.codec.ico;
+
+import com.crea_si.image4droid.io.LittleEndianInputStream;
+import com.crea_si.image4droid.io.LittleEndianOutputStream;
 
 import java.io.IOException;
-
-import net.sf.image4j.io.LittleEndianInputStream;
 
 /**
  * Represents an <tt>IconEntry</tt> structure, which contains information about an ICO image.
@@ -105,7 +106,7 @@ public class IconEntry {
      * @param out the output
      * @throws java.io.IOException if an error occurs
      */
-    public void write(net.sf.image4j.io.LittleEndianOutputStream out) throws IOException {
+    public void write(LittleEndianOutputStream out) throws IOException {
         //Width 	1 byte 	Cursor Width (16, 32 or 64)
         out.writeByte(bWidth);
         //Height 	1 byte 	Cursor Height (16, 32 or 64 , most commonly = Width)

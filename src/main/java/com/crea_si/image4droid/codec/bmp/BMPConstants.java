@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package net.sf.image4j.codec.bmp;
+package com.crea_si.image4droid.codec.bmp;
 
 /**
  * Provides constants used with BMP format.

@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package net.sf.image4j.codec.ico;
+package com.crea_si.image4droid.codec.ico;
 
 /**
  * Provides constants used with ICO format.

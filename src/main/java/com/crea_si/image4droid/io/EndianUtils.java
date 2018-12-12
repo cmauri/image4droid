@@ -1,4 +1,4 @@
-package net.sf.image4j.io;
+package com.crea_si.image4droid.io;
 
 /**
  * Provides utility methods for endian conversions [big-endian to little-endian;
