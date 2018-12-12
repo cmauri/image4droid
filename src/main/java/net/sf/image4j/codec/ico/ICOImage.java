@@ -11,6 +11,7 @@ package net.sf.image4j.codec.ico;
 
 import android.graphics.Bitmap;
 
+import net.sf.image4j.codec.bmp.BMPImage;
 import net.sf.image4j.codec.bmp.InfoHeader;
 
 /**
@@ -18,11 +19,11 @@ import net.sf.image4j.codec.bmp.InfoHeader;
  * @since 0.7
  * @author Ian McDonagh
  */
-public class ICOImage extends net.sf.image4j.codec.bmp.BMPImage {
+public class ICOImage extends BMPImage {
   
-  protected IconEntry iconEntry;
-  protected boolean pngCompressed = false;
-  protected int iconIndex = -1;
+  private IconEntry iconEntry;
+  private boolean pngCompressed = false;
+  private int iconIndex = -1;
   
   /**
    * Creates a new instance of ICOImage
@@ -30,7 +31,7 @@ public class ICOImage extends net.sf.image4j.codec.bmp.BMPImage {
    * @param infoHeader the BMP InfoHeader structure for the BMP encoded ICO image
    * @param iconEntry the IconEntry structure describing the ICO image
    */
-  public ICOImage(Bitmap image, net.sf.image4j.codec.bmp.InfoHeader infoHeader,
+  public ICOImage(Bitmap image, InfoHeader infoHeader,
                   IconEntry iconEntry) {
     super(image, infoHeader);
     this.iconEntry = iconEntry;
@@ -137,6 +138,6 @@ public class ICOImage extends net.sf.image4j.codec.bmp.BMPImage {
    * @since 0.7alpha2
    */
   public boolean isIndexed() {
-    return iconEntry == null ? false : iconEntry.sBitCount <= 8;
+    return iconEntry != null && iconEntry.sBitCount <= 8;
   }
 }

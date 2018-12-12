@@ -18,7 +18,7 @@ import android.graphics.Bitmap;
  */
 public class BMPImage {
   
-  protected InfoHeader infoHeader;
+  private InfoHeader infoHeader;
   protected Bitmap image;
   
   /**

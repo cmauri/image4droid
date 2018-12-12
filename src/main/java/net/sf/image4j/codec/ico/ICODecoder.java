@@ -14,12 +14,28 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.Log;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import net.sf.image4j.codec.bmp.BMPConstants;
+import net.sf.image4j.codec.bmp.BMPDecoder;
+import net.sf.image4j.codec.bmp.ColorEntry;
+import net.sf.image4j.codec.bmp.InfoHeader;
+import net.sf.image4j.io.CountingInputStream;
+import net.sf.image4j.io.EndianUtils;
+import net.sf.image4j.io.LittleEndianInputStream;
 
-import net.sf.image4j.codec.bmp.*;
-import net.sf.image4j.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Decodes images in ICO format.
@@ -40,44 +56,42 @@ public class ICODecoder {
 
 	/**
 	 * Reads and decodes the given ICO file. Convenience method equivalent to
-	 * {@link #read(java.io.InputStream) read(new
-	 * java.io.FileInputStream(file))}.
+	 * {@link #read(InputStream) read(new
+	 * FileInputStream(file))}.
 	 * 
 	 * @param file
 	 *            the source file to read
 	 * @return the list of images decoded from the ICO data
-	 * @throws java.io.IOException
+	 * @throws IOException
 	 *             if an error occurs
 	 */
-	public static java.util.List<Bitmap> read(java.io.File file)
-			throws IOException {
-		java.io.FileInputStream fin = new java.io.FileInputStream(file);
+	public static List<Bitmap> read(File file) throws IOException {
+		FileInputStream fin = new FileInputStream(file);
 		try {
 			return read(new BufferedInputStream(fin));
 		} finally {
 			try {
 				fin.close();
 			} catch (IOException ex) {
-				Log.i(TAG, "Failed to close file input for file " + file);
+				Log.w(TAG, "Failed to close file input for file " + file);
 			}
 		}
 	}
 
 	/**
 	 * Reads and decodes the given ICO file, together with all metadata.
-	 * Convenience method equivalent to {@link #readExt(java.io.InputStream)
-	 * readExt(new java.io.FileInputStream(file))}.
+	 * Convenience method equivalent to {@link #readExt(InputStream)
+	 * readExt(new FileInputStream(file))}.
 	 * 
 	 * @param file
 	 *            the source file to read
 	 * @return the list of images decoded from the ICO data
-	 * @throws java.io.IOException
+	 * @throws IOException
 	 *             if an error occurs
 	 * @since 0.7
 	 */
-	public static java.util.List<ICOImage> readExt(java.io.File file)
-			throws IOException {
-		java.io.FileInputStream fin = new java.io.FileInputStream(file);
+	public static List<ICOImage> readExt(File file) throws IOException {
+		FileInputStream fin = new FileInputStream(file);
 		try {
 			return readExt(new BufferedInputStream(fin));
 		} finally {
@@ -96,13 +110,12 @@ public class ICODecoder {
 	 * @param is
 	 *            the source <tt>InputStream</tt> to read
 	 * @return the list of images decoded from the ICO data
-	 * @throws java.io.IOException
+	 * @throws IOException
 	 *             if an error occurs
 	 */
-	public static java.util.List<Bitmap> read(java.io.InputStream is)
-			throws IOException {
-		java.util.List<ICOImage> list = readExt(is);
-		java.util.List<Bitmap> ret = new java.util.ArrayList<>(list.size());
+	public static List<Bitmap> read(InputStream is)	throws IOException {
+		List<ICOImage> list = readExt(is);
+		List<Bitmap> ret = new ArrayList<>(list.size());
 		for (int i = 0; i < list.size(); i++) {
 			ICOImage icoImage = list.get(i);
 			Bitmap image = icoImage.getImage();
@@ -114,7 +127,6 @@ public class ICODecoder {
 	private static IconEntry[] sortByFileOffset(IconEntry[] entries) {
 		List<IconEntry> list = Arrays.asList(entries);
 		Collections.sort(list, new Comparator<IconEntry>() {
-
 			@Override
 			public int compare(IconEntry o1, IconEntry o2) {
 				return o1.iFileOffset - o2.iFileOffset;
@@ -136,15 +148,12 @@ public class ICODecoder {
 	 * @since 0.7
 	 */
 	public static List<ICOImage> readExt(InputStream is) throws IOException {
-		// long t = System.currentTimeMillis();
-
-		LittleEndianInputStream in = new LittleEndianInputStream(
-				new CountingInputStream(is));
+		LittleEndianInputStream in = new LittleEndianInputStream(new CountingInputStream(is));
 
 		// Reserved 2 byte =0
-		short sReserved = in.readShortLE();
+		in.readShortLE();
 		// Type 2 byte =1
-		short sType = in.readShortLE();
+		in.readShortLE();
 		// Count 2 byte Number of Icons in this file
 		short sCount = in.readShortLE();
 
@@ -261,11 +270,7 @@ public class ICODecoder {
 					IconEntry e = entries[i];
 					int size = e.iSizeInBytes - 8;
 					byte[] pngData = new byte[size];
-					/* int count = */in.readFully(pngData);
-					// if (count != pngData.length) {
-					// throw new
-					// IOException("Unable to read image #"+i+" - incomplete PNG compressed data");
-					// }
+
 					ByteArrayOutputStream bout = new ByteArrayOutputStream();
 					DataOutputStream dout = new DataOutputStream(bout);
 					dout.writeInt(PNG_MAGIC);
@@ -288,24 +293,12 @@ public class ICODecoder {
 					bout.close();
 					dout.close();
 				} else {
-					throw new IOException(
-							"Unrecognized icon format for image #" + i);
+					throw new IOException("Unrecognized icon format for image #" + i);
 				}
-
-				/*
-				 * InfoHeader andInfoHeader = new InfoHeader();
-				 * andInfoHeader.iColorsImportant = 0; andInfoHeader.iColorsUsed
-				 * = 0; andInfoHeader.iCompression = BMPConstants.BI_RGB;
-				 * andInfoHeader.iHeight = xorInfoHeader.iHeight / 2;
-				 * andInfoHeader.iWidth = xorInfoHeader.
-				 */
 			}
 		} catch (IOException ex) {
 			throw new IOException("Failed to read image # " + i, ex);
 		}
-
-		// long t2 = System.currentTimeMillis();
-		// System.out.println("Loaded ICO file in "+(t2 - t)+"ms");
 
 		return ret;
 	}

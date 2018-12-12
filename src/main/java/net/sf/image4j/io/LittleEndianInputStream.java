@@ -48,10 +48,8 @@ public class LittleEndianInputStream extends java.io.DataInputStream implements 
     if (b1 < 0 || b2 < 0) {
       throw new EOFException();
     }
-    
-    short ret = (short) ((b2 << 8) + (b1 << 0));
-    
-    return ret;
+
+    return (short) ((b2 << 8) + (b1));
   }
   
   /**
@@ -68,10 +66,8 @@ public class LittleEndianInputStream extends java.io.DataInputStream implements 
     if (b1 < -1 || b2 < -1 || b3 < -1 || b4 < -1) {
       throw new EOFException();
     }
-    
-    int ret = (b4 << 24) + (b3 << 16) + (b2 << 8) + (b1 << 0);
-    
-    return ret;
+
+    return (b4 << 24) + (b3 << 16) + (b2 << 8) + (b1);
   }
   
   /**
@@ -81,10 +77,8 @@ public class LittleEndianInputStream extends java.io.DataInputStream implements 
    */
   public float readFloatLE() throws IOException {
     int i = readIntLE();
-    
-    float ret = Float.intBitsToFloat(i);
-    
-    return ret;
+
+    return Float.intBitsToFloat(i);
   }
   
   /**
@@ -96,10 +90,8 @@ public class LittleEndianInputStream extends java.io.DataInputStream implements 
     
     int i1 = readIntLE();
     int i2 = readIntLE();
-    
-    long ret = ((long)(i1) << 32) + (i2 & 0xFFFFFFFFL);
-    
-    return ret;
+
+    return ((long)(i1) << 32) + (i2 & 0xFFFFFFFFL);
   }
   
   /**
@@ -110,10 +102,8 @@ public class LittleEndianInputStream extends java.io.DataInputStream implements 
   public double readDoubleLE() throws IOException {
     
     long l = readLongLE();
-    
-    double ret = Double.longBitsToDouble(l);
-    
-    return ret;
+
+    return Double.longBitsToDouble(l);
   }      
   
   /**
@@ -124,10 +114,8 @@ public class LittleEndianInputStream extends java.io.DataInputStream implements 
     long i2 = readUnsignedByte();
     long i3 = readUnsignedByte();
     long i4 = readUnsignedByte();
-   
-    long ret = ((i1 << 24) | (i2 << 16) | (i3 << 8) | i4); 
-    
-    return ret;
+
+    return ((i1 << 24) | (i2 << 16) | (i3 << 8) | i4);
   }
   
   /**
@@ -138,9 +126,7 @@ public class LittleEndianInputStream extends java.io.DataInputStream implements 
     long i2 = readUnsignedByte();
     long i3 = readUnsignedByte();
     long i4 = readUnsignedByte();
-    
-    long ret = (i4 << 24) | (i3 << 16) | (i2 << 8) | i1;
-    
-    return ret;
+
+    return (i4 << 24) | (i3 << 16) | (i2 << 8) | i1;
   }
 }

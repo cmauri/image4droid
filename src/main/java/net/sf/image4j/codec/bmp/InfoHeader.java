@@ -10,6 +10,8 @@
 package net.sf.image4j.codec.bmp;
 
 import java.io.IOException;
+
+import net.sf.image4j.io.LittleEndianInputStream;
 import net.sf.image4j.io.LittleEndianOutputStream;
 
 /**
@@ -79,7 +81,7 @@ public class InfoHeader {
    * @param in the source input
    * @throws java.io.IOException if an error occurs
    */
-  public InfoHeader(net.sf.image4j.io.LittleEndianInputStream in) throws IOException {
+  public InfoHeader(LittleEndianInputStream in) throws IOException {
     //Size of InfoHeader structure = 40
     iSize = in.readIntLE();
     
@@ -89,14 +91,14 @@ public class InfoHeader {
   /**
    * @since 0.6
    */
-  public InfoHeader(net.sf.image4j.io.LittleEndianInputStream in, int infoSize) throws IOException {
+  public InfoHeader(LittleEndianInputStream in, int infoSize) throws IOException {
     init(in, infoSize);
   }
   
   /**
    * @since 0.6
    */
-  protected void init(net.sf.image4j.io.LittleEndianInputStream in, int infoSize) throws IOException {
+  protected void init(LittleEndianInputStream in, int infoSize) throws IOException {
     this.iSize = infoSize;
     
     //Width
@@ -140,7 +142,7 @@ public class InfoHeader {
     //Bit count
     sBitCount = 0;
     
-    //caculate NumColors
+    // calculate NumColors
     iNumColors = 0;
     
     //Compression
@@ -182,7 +184,7 @@ public class InfoHeader {
    * @param out the output to which the structure will be written
    * @throws java.io.IOException if an error occurs
    */ 
-  public void write(net.sf.image4j.io.LittleEndianOutputStream out) throws IOException {
+  public void write(LittleEndianOutputStream out) throws IOException {
       //Size of InfoHeader structure = 40
     out.writeIntLE(iSize);
     //Width
@@ -194,7 +196,7 @@ public class InfoHeader {
     //Bit count
     out.writeShortLE(sBitCount);
     
-    //caculate NumColors
+    // calculate NumColors
     //iNumColors = (int) Math.pow(2, sBitCount);
     
     //Compression

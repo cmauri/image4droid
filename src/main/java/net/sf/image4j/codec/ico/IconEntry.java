@@ -86,15 +86,14 @@ public class IconEntry {
    * A string representation of this <tt>IconEntry</tt> structure.
    */
   public String toString() {
-    StringBuffer sb = new StringBuffer();
-    sb.append("width=");
-    sb.append(bWidth);
-    sb.append(",height=");
-    sb.append(bHeight);
-    sb.append(",bitCount=");
-    sb.append(sBitCount);
-    sb.append(",colorCount="+bColorCount);
-    return sb.toString();
+    return "width=" +
+            bWidth +
+            ",height=" +
+            bHeight +
+            ",bitCount=" +
+            sBitCount +
+            ",colorCount=" +
+            bColorCount;
   }
   
   /**

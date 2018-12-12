@@ -37,6 +37,7 @@ public class BMPDecoder {
     
     //signature "BM" [2]
     byte[] bsignature = new byte[2];
+    //noinspection ResultOfMethodCallIgnored
     lis.read(bsignature);
     String signature = new String(bsignature, "UTF-8");
     
@@ -45,13 +46,13 @@ public class BMPDecoder {
     }
     
     //file size [4]
-    int fileSize = lis.readIntLE();
-    
+    lis.readIntLE();
+
     //reserved = 0 [4]
-    int reserved = lis.readIntLE();
+    lis.readIntLE();
     
     //DataOffset [4] file offset to raster data
-    int dataOffset = lis.readIntLE();
+    lis.readIntLE();
     
     /* info header [40] */
     
@@ -86,7 +87,7 @@ public class BMPDecoder {
    * The <tt>InfoHeader</tt> structure, which provides information about the BMP data.
    * @return the <tt>InfoHeader</tt> structure that was read from the source data when this <tt>BMPDecoder</tt>
    * was created.
-   */  
+   */
   public InfoHeader getInfoHeader() {
     return infoHeader;
   }
@@ -155,7 +156,7 @@ public class BMPDecoder {
    * contained in the <tt>InfoHeader</tt>.
    * @param colorTable <tt>ColorEntry</tt> array containing palette
    * @param infoHeader an <tt>InfoHeader</tt> that was read by a call to 
-   * {@link #readInfoHeader(net.sf.image4j.io.LittleEndianInputStream) readInfoHeader()}.
+   * {@link #readInfoHeader(LittleEndianInputStream) readInfoHeader()}.
    * @param lis the source input
    * @return the decoded image read from the source input
    * @throws java.io.IOException if any error occurs
@@ -248,14 +249,11 @@ public class BMPDecoder {
             Bitmap.Config.ARGB_8888);
 
 
-    int dataBitsPerLine = infoHeader.iWidth;    
-    int bitsPerLine = dataBitsPerLine;
+    int bitsPerLine = infoHeader.iWidth;
     if (bitsPerLine % 32 != 0) {
       bitsPerLine = (bitsPerLine / 32 + 1) * 32;
     }
-    int padBits = bitsPerLine - dataBitsPerLine;
-    int padBytes = padBits / 8;
-    
+
     int bytesPerLine = bitsPerLine / 8;
     int[] line = new int[bytesPerLine];
     
@@ -269,9 +267,6 @@ public class BMPDecoder {
         int v = line[i];
         int b = x % 8;
         int index = getBit(v, b);
-        //int rgb = c[index];
-        //img.setRGB(x, y, rgb);
-        //set the sample (colour index) for the pixel
 
         // TODO: provide a faster way to write to the bitmap
         img.setPixel(x, y, Color.rgb(ar[index], ag[index], ab[index]));
@@ -366,7 +361,7 @@ public class BMPDecoder {
             Bitmap.Config.ARGB_8888);
     
 
-    //create color pallette
+    //create color palette
     int[] c = new int[infoHeader.iNumColors];
     for (int i = 0; i < c.length; i++) {
       int r = colorTable[i].bRed;
@@ -386,12 +381,11 @@ public class BMPDecoder {
     for (int y = infoHeader.iHeight - 1; y >= 0; y--) {
       for (int x = 0; x < infoHeader.iWidth; x++) {
         int b = lis.readUnsignedByte();
-        //int clr = c[b];
-        //img.setRGB(x, y, clr);
-        //set sample (colour index) for pixel
-        img.setPixel(x, y, Color.argb(255, Color.red(c[b]), Color.green(c[b]), Color.blue(c[b])));
+        img.setPixel(x, y, Color.argb(255,
+                Color.red(c[b]), Color.green(c[b]), Color.blue(c[b])));
       }
-      
+
+      //noinspection ResultOfMethodCallIgnored
       lis.skip(padBytesPerLine);
     }
     
@@ -434,9 +428,9 @@ public class BMPDecoder {
 
         img.setPixel(x, y, Color.rgb(r, g, b));
       }
+      //noinspection ResultOfMethodCallIgnored
       lis.skip(padBytesPerLine);
     }
-    
     return img;
   }
   
@@ -458,7 +452,8 @@ public class BMPDecoder {
     // alpha 1
     //No padding since each pixel = 32 bits
 
-    Bitmap img = Bitmap.createBitmap(infoHeader.iWidth, infoHeader.iHeight, Bitmap.Config.ARGB_8888);
+    Bitmap img =
+            Bitmap.createBitmap(infoHeader.iWidth, infoHeader.iHeight, Bitmap.Config.ARGB_8888);
     
     for (int y = infoHeader.iHeight - 1; y >= 0; y--) {
       for (int x = 0; x < infoHeader.iWidth; x++) {
@@ -480,14 +475,9 @@ public class BMPDecoder {
    * @return the decoded image read from the source file
    */
   public static Bitmap read(java.io.File file) throws IOException {
-	  FileInputStream fin = new FileInputStream(file);
-	  try {
-		  return read(new BufferedInputStream(fin));
-	  } finally {
-		  try {
-			  fin.close();
-		  } catch (IOException ex) { }
-	  }
+    try (FileInputStream fin = new FileInputStream(file)) {
+        return read(new BufferedInputStream(fin));
+    }
   }
   
   /**
@@ -509,14 +499,9 @@ public class BMPDecoder {
    * @since 0.7
    */
   public static BMPImage readExt(java.io.File file) throws IOException {
-	  FileInputStream fin = new FileInputStream(file);
-     try {
-    	 return readExt(new BufferedInputStream(fin));    
-     } finally {
-    	 try {
-    		 fin.close();
-    	 } catch (IOException ex) { }
-     }
+    try (FileInputStream fin = new FileInputStream(file)) {
+      return readExt(new BufferedInputStream(fin));
+    }
   }
   
   /**
@@ -528,7 +513,6 @@ public class BMPDecoder {
    */
   public static BMPImage readExt(InputStream in) throws IOException {
     BMPDecoder d = new BMPDecoder(in);
-    BMPImage ret = new BMPImage(d.getBitmap(), d.getInfoHeader());
-    return ret;
+    return new BMPImage(d.getBitmap(), d.getInfoHeader());
   }
 }
