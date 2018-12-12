@@ -1,3 +1,9 @@
+# image4droid
+
+Library to decode BMP/ICO/CUR files into a list of Bitmap-objects. This library has been adapted from [image4j project](https://github.com/imcdonagh/image4j "image4j") to work on Android. Only the decoding part has been kept.
+
+The original README file follows: 
+
 # image4j
 
 ## Overview
