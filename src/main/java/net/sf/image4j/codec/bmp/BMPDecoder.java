@@ -6,10 +6,16 @@
 
 package net.sf.image4j.codec.bmp;
 
-import java.awt.image.*;
-import java.io.*;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 
-import net.sf.image4j.io.*;
+import net.sf.image4j.io.CountingInputStream;
+import net.sf.image4j.io.LittleEndianInputStream;
+
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Decodes images in BMP format.
@@ -17,14 +23,14 @@ import net.sf.image4j.io.*;
  */
 public class BMPDecoder {
   
-  private BufferedImage img;
+  private Bitmap img;
   private InfoHeader infoHeader;
   
   /** Creates a new instance of BMPDecoder and reads the BMP data from the source.
    * @param in the source <tt>InputStream</tt> from which to read the BMP data
-   * @throws java.io.IOException if an error occurs
+   * @throws IOException if an error occurs
    */
-  public BMPDecoder(java.io.InputStream in) throws IOException {
+  public BMPDecoder(InputStream in) throws IOException {
     LittleEndianInputStream lis = new LittleEndianInputStream(new CountingInputStream(in));
             
     /* header [14] */
@@ -89,7 +95,7 @@ public class BMPDecoder {
    * The decoded image read from the source input.
    * @return the <tt>BufferedImage</tt> representing the BMP image.
    */
-  public BufferedImage getBufferedImage() {
+  public Bitmap getBitmap() {
     return img;
   }
   
@@ -107,17 +113,15 @@ public class BMPDecoder {
    * @return the <tt>InfoHeader</tt> structure
    * @throws java.io.IOException if an error occurred
    */
-  public static InfoHeader readInfoHeader(net.sf.image4j.io.LittleEndianInputStream lis) throws IOException {
-    InfoHeader infoHeader = new InfoHeader(lis);
-    return infoHeader;
+  public static InfoHeader readInfoHeader(LittleEndianInputStream lis) throws IOException {
+      return new InfoHeader(lis);
   }
   
   /**
    * @since 0.6
    */
-  public static InfoHeader readInfoHeader(net.sf.image4j.io.LittleEndianInputStream lis, int infoSize) throws IOException {
-    InfoHeader infoHeader = new InfoHeader(lis, infoSize);
-    return infoHeader;
+  public static InfoHeader readInfoHeader(LittleEndianInputStream lis, int infoSize) throws IOException {
+      return new InfoHeader(lis, infoSize);
   }
   
   /**
@@ -129,8 +133,8 @@ public class BMPDecoder {
    * @return the decoded image read from the source input
    * @throws java.io.IOException if an error occurs
    */
-  public static BufferedImage read(InfoHeader infoHeader, net.sf.image4j.io.LittleEndianInputStream lis) throws IOException {
-    BufferedImage img = null;
+  public static Bitmap read(InfoHeader infoHeader, LittleEndianInputStream lis) throws IOException {
+    Bitmap img;
     
     /* Color table (palette) */
     
@@ -156,10 +160,10 @@ public class BMPDecoder {
    * @return the decoded image read from the source input
    * @throws java.io.IOException if any error occurs
    */
-  public static BufferedImage read(InfoHeader infoHeader, net.sf.image4j.io.LittleEndianInputStream lis,
+  public static Bitmap read(InfoHeader infoHeader, LittleEndianInputStream lis,
       ColorEntry[] colorTable) throws IOException {
-    
-    BufferedImage img = null;
+
+    Bitmap img;
     
     //1-bit (monochrome) uncompressed
     if (infoHeader.sBitCount == 1 && infoHeader.iCompression == BMPConstants.BI_RGB) {
@@ -202,12 +206,12 @@ public class BMPDecoder {
    * Reads the <tt>ColorEntry</tt> table from the given <tt>InputStream</tt> using
    * the information contained in the given <tt>infoHeader</tt>.
    * @param infoHeader the <tt>InfoHeader</tt> structure, which was read using
-   * {@link #readInfoHeader(net.sf.image4j.io.LittleEndianInputStream) readInfoHeader()}
+   * {@link #readInfoHeader(LittleEndianInputStream) readInfoHeader()}
    * @param lis the <tt>InputStream</tt> to read
-   * @throws java.io.IOException if an error occurs
+   * @throws IOException if an error occurs
    * @return the decoded image read from the source input
    */
-  public static ColorEntry[] readColorTable(InfoHeader infoHeader, net.sf.image4j.io.LittleEndianInputStream lis) throws IOException {
+  public static ColorEntry[] readColorTable(InfoHeader infoHeader, LittleEndianInputStream lis) throws IOException {
     ColorEntry[] colorTable = new ColorEntry[infoHeader.iNumColors];
     for (int i = 0; i < infoHeader.iNumColors; i++) {
       ColorEntry ce = new ColorEntry(lis);
@@ -220,15 +224,15 @@ public class BMPDecoder {
    * Reads 1-bit uncompressed bitmap raster data, which may be monochrome depending on the
    * palette entries in <tt>colorTable</tt>.
    * @param infoHeader the <tt>InfoHeader</tt> structure, which was read using
-   * {@link #readInfoHeader(net.sf.image4j.io.LittleEndianInputStream) readInfoHeader()}
+   * {@link #readInfoHeader(LittleEndianInputStream) readInfoHeader()}
    * @param lis the source input
    * @param colorTable <tt>ColorEntry</tt> array specifying the palette, which
    * must not be <tt>null</tt>.
-   * @throws java.io.IOException if an error occurs
+   * @throws IOException if an error occurs
    * @return the decoded image read from the source input
    */
-  public static BufferedImage read1(InfoHeader infoHeader,
-      net.sf.image4j.io.LittleEndianInputStream lis,
+  public static Bitmap read1(InfoHeader infoHeader,
+      LittleEndianInputStream lis,
       ColorEntry[] colorTable) throws IOException {
     //1 bit per pixel or 8 pixels per byte
     //each pixel specifies the palette index
@@ -238,24 +242,12 @@ public class BMPDecoder {
     byte[] ab = new byte[colorTable.length];
     
     getColorTable(colorTable, ar, ag, ab);
-    
-    IndexColorModel icm = new IndexColorModel(
-        1, 2, ar, ag, ab
-        );
-    
+
     // Create indexed image
-    BufferedImage img = new BufferedImage(
-        infoHeader.iWidth, infoHeader.iHeight,
-        BufferedImage.TYPE_BYTE_BINARY,
-        icm
-        );
-    // We'll use the raster to set samples instead of RGB values.
-    // The SampleModel of an indexed image interprets samples as
-    // the index of the colour for a pixel, which is perfect for use here.
-    WritableRaster raster = img.getRaster();
-    
-    //padding    
-    
+    Bitmap img = Bitmap.createBitmap(infoHeader.iWidth, infoHeader.iHeight,
+            Bitmap.Config.ARGB_8888);
+
+
     int dataBitsPerLine = infoHeader.iWidth;    
     int bitsPerLine = dataBitsPerLine;
     if (bitsPerLine % 32 != 0) {
@@ -264,7 +256,7 @@ public class BMPDecoder {
     int padBits = bitsPerLine - dataBitsPerLine;
     int padBytes = padBits / 8;
     
-    int bytesPerLine = (int) (bitsPerLine / 8);
+    int bytesPerLine = bitsPerLine / 8;
     int[] line = new int[bytesPerLine];
     
     for (int y = infoHeader.iHeight - 1; y >= 0; y--) {
@@ -280,7 +272,9 @@ public class BMPDecoder {
         //int rgb = c[index];
         //img.setRGB(x, y, rgb);
         //set the sample (colour index) for the pixel
-        raster.setSample(x, y, 0, index);
+
+        // TODO: provide a faster way to write to the bitmap
+        img.setPixel(x, y, Color.rgb(ar[index], ag[index], ab[index]));
       }
     }
     
@@ -291,15 +285,15 @@ public class BMPDecoder {
    * Reads 4-bit uncompressed bitmap raster data, which is interpreted based on the colours
    * specified in the palette.
    * @param infoHeader the <tt>InfoHeader</tt> structure, which was read using
-   * {@link #readInfoHeader(net.sf.image4j.io.LittleEndianInputStream) readInfoHeader()}
+   * {@link #readInfoHeader(LittleEndianInputStream) readInfoHeader()}
    * @param lis the source input
    * @param colorTable <tt>ColorEntry</tt> array specifying the palette, which
    * must not be <tt>null</tt>.
    * @throws java.io.IOException if an error occurs
    * @return the decoded image read from the source input
    */
-  public static BufferedImage read4(InfoHeader infoHeader,
-      net.sf.image4j.io.LittleEndianInputStream lis,
+  public static Bitmap read4(InfoHeader infoHeader,
+      LittleEndianInputStream lis,
       ColorEntry[] colorTable) throws IOException {
     
     // 2 pixels per byte or 4 bits per pixel.
@@ -310,25 +304,16 @@ public class BMPDecoder {
     byte[] ab = new byte[colorTable.length];
     
     getColorTable(colorTable, ar, ag, ab);
-    
-    IndexColorModel icm = new IndexColorModel(
-        4, infoHeader.iNumColors, ar, ag, ab
-        );
-    
-    BufferedImage img = new BufferedImage(
-        infoHeader.iWidth, infoHeader.iHeight,
-        BufferedImage.TYPE_BYTE_BINARY,
-        icm
-        );
-    
-    WritableRaster raster = img.getRaster();
+
+    Bitmap img = Bitmap.createBitmap(infoHeader.iWidth, infoHeader.iHeight,
+            Bitmap.Config.ARGB_8888);
     
     //padding
     int bitsPerLine = infoHeader.iWidth * 4;
     if (bitsPerLine % 32 != 0) {
       bitsPerLine = (bitsPerLine / 32 + 1) * 32;
     }
-    int bytesPerLine = (int) (bitsPerLine / 8);
+    int bytesPerLine = bitsPerLine / 8;
     
     int[] line = new int[bytesPerLine];
     
@@ -346,7 +331,7 @@ public class BMPDecoder {
         int i = x % 2;
         int n = line[b];
         int index = getNibble(n, i);
-        raster.setSample(x, y, 0, index);
+        img.setPixel(x, y, Color.rgb(ar[index], ag[index], ab[index]));
       }
     }
     
@@ -357,16 +342,15 @@ public class BMPDecoder {
    * Reads 8-bit uncompressed bitmap raster data, which is interpreted based on the colours
    * specified in the palette.
    * @param infoHeader the <tt>InfoHeader</tt> structure, which was read using
-   * {@link #readInfoHeader(net.sf.image4j.io.LittleEndianInputStream) readInfoHeader()}
+   * {@link #readInfoHeader(LittleEndianInputStream) readInfoHeader()}
    * @param lis the source input
    * @param colorTable <tt>ColorEntry</tt> array specifying the palette, which
    * must not be <tt>null</tt>.
    * @throws java.io.IOException if an error occurs
    * @return the decoded image read from the source input
    */
-  public static BufferedImage read8(InfoHeader infoHeader,
-      net.sf.image4j.io.LittleEndianInputStream lis,
-      ColorEntry[] colorTable) throws IOException {
+  public static Bitmap read8(InfoHeader infoHeader, LittleEndianInputStream lis,
+                              ColorEntry[] colorTable) throws IOException {
     //1 byte per pixel
     //  color index 1 (index of color in palette)
     //lines padded to nearest 32bits
@@ -377,30 +361,20 @@ public class BMPDecoder {
     byte[] ab = new byte[colorTable.length];
     
     getColorTable(colorTable, ar, ag, ab);
+
+    Bitmap img = Bitmap.createBitmap(infoHeader.iWidth, infoHeader.iHeight,
+            Bitmap.Config.ARGB_8888);
     
-    IndexColorModel icm = new IndexColorModel(
-        8, infoHeader.iNumColors, ar, ag, ab
-        );
-    
-    BufferedImage img = new BufferedImage(
-        infoHeader.iWidth, infoHeader.iHeight,
-        BufferedImage.TYPE_BYTE_INDEXED,
-        icm
-        );
-    
-    WritableRaster raster = img.getRaster();
-    
-      /*
-      //create color pallette
-      int[] c = new int[infoHeader.iNumColors];
-      for (int i = 0; i < c.length; i++) {
-        int r = colorTable[i].bRed;
-        int g = colorTable[i].bGreen;
-        int b = colorTable[i].bBlue;
-        c[i] = (r << 16) | (g << 8) | (b);
-      }
-       */
-    
+
+    //create color pallette
+    int[] c = new int[infoHeader.iNumColors];
+    for (int i = 0; i < c.length; i++) {
+      int r = colorTable[i].bRed;
+      int g = colorTable[i].bGreen;
+      int b = colorTable[i].bBlue;
+      c[i] = (r << 16) | (g << 8) | (b);
+    }
+
     //padding
     int dataPerLine = infoHeader.iWidth;
     int bytesPerLine = dataPerLine;
@@ -415,7 +389,7 @@ public class BMPDecoder {
         //int clr = c[b];
         //img.setRGB(x, y, clr);
         //set sample (colour index) for pixel
-        raster.setSample(x, y , 0, b);
+        img.setPixel(x, y, Color.argb(255, Color.red(c[b]), Color.green(c[b]), Color.blue(c[b])));
       }
       
       lis.skip(padBytesPerLine);
@@ -428,26 +402,22 @@ public class BMPDecoder {
    * Reads 24-bit uncompressed bitmap raster data.
    * @param lis the source input
    * @param infoHeader the <tt>InfoHeader</tt> structure, which was read using
-   * {@link #readInfoHeader(net.sf.image4j.io.LittleEndianInputStream) readInfoHeader()}
+   * {@link #readInfoHeader(LittleEndianInputStream) readInfoHeader()}
    * @throws java.io.IOException if an error occurs
    * @return the decoded image read from the source input
    */
-  public static BufferedImage read24(InfoHeader infoHeader,
-      net.sf.image4j.io.LittleEndianInputStream lis) throws IOException {
+  public static Bitmap read24(InfoHeader infoHeader,
+      LittleEndianInputStream lis) throws IOException {
     //3 bytes per pixel
     //  blue 1
     //  green 1
     //  red 1
     // lines padded to nearest 32 bits
     // no alpha
-    
-    BufferedImage img = new BufferedImage(
-        infoHeader.iWidth, infoHeader.iHeight,
-        BufferedImage.TYPE_INT_RGB
-        );
-    
-    WritableRaster raster = img.getRaster();
-    
+
+    Bitmap img =
+            Bitmap.createBitmap(infoHeader.iWidth, infoHeader.iHeight, Bitmap.Config.ARGB_8888);
+
     //padding to nearest 32 bits
     int dataPerLine = infoHeader.iWidth * 3;
     int bytesPerLine = dataPerLine;
@@ -461,13 +431,8 @@ public class BMPDecoder {
         int b = lis.readUnsignedByte();
         int g = lis.readUnsignedByte();
         int r = lis.readUnsignedByte();
-        
-        //int c = 0x00000000 | (r << 16) | (g << 8) | (b);
-        //System.out.println(x + ","+y+"="+Integer.toHexString(c));
-        //img.setRGB(x, y, c);
-        raster.setSample(x, y, 0, r);
-        raster.setSample(x, y, 1, g);
-        raster.setSample(x, y, 2, b);
+
+        img.setPixel(x, y, Color.rgb(r, g, b));
       }
       lis.skip(padBytesPerLine);
     }
@@ -480,26 +445,20 @@ public class BMPDecoder {
    * Reads 32-bit uncompressed bitmap raster data, with transparency.
    * @param lis the source input
    * @param infoHeader the <tt>InfoHeader</tt> structure, which was read using
-   * {@link #readInfoHeader(net.sf.image4j.io.LittleEndianInputStream) readInfoHeader()}
+   * {@link #readInfoHeader(LittleEndianInputStream) readInfoHeader()}
    * @throws java.io.IOException if an error occurs
    * @return the decoded image read from the source input
    */
-  public static BufferedImage read32(InfoHeader infoHeader,
-      net.sf.image4j.io.LittleEndianInputStream lis) throws IOException {
+  public static Bitmap read32(InfoHeader infoHeader,
+      LittleEndianInputStream lis) throws IOException {
     //4 bytes per pixel
     // blue 1
     // green 1
     // red 1
     // alpha 1
     //No padding since each pixel = 32 bits
-    
-    BufferedImage img = new BufferedImage(
-        infoHeader.iWidth, infoHeader.iHeight,
-        BufferedImage.TYPE_INT_ARGB
-        );
-    
-    WritableRaster rgb = img.getRaster();
-    WritableRaster alpha = img.getAlphaRaster();
+
+    Bitmap img = Bitmap.createBitmap(infoHeader.iWidth, infoHeader.iHeight, Bitmap.Config.ARGB_8888);
     
     for (int y = infoHeader.iHeight - 1; y >= 0; y--) {
       for (int x = 0; x < infoHeader.iWidth; x++) {
@@ -507,10 +466,7 @@ public class BMPDecoder {
         int g = lis.readUnsignedByte();
         int r = lis.readUnsignedByte();
         int a = lis.readUnsignedByte();
-        rgb.setSample(x, y, 0, r);
-        rgb.setSample(x, y, 1, g);
-        rgb.setSample(x, y, 2, b);
-        alpha.setSample(x, y, 0, a);
+        img.setPixel(x, y, Color.argb(a, r, g, b));
       }
     }
     
@@ -523,8 +479,8 @@ public class BMPDecoder {
    * @throws java.io.IOException if an error occurs
    * @return the decoded image read from the source file
    */
-  public static BufferedImage read(java.io.File file) throws IOException {
-	  java.io.FileInputStream fin = new java.io.FileInputStream(file);
+  public static Bitmap read(java.io.File file) throws IOException {
+	  FileInputStream fin = new FileInputStream(file);
 	  try {
 		  return read(new BufferedInputStream(fin));
 	  } finally {
@@ -540,9 +496,9 @@ public class BMPDecoder {
    * @throws java.io.IOException if an error occurs
    * @return the decoded image read from the source file
    */
-  public static BufferedImage read(java.io.InputStream in) throws IOException {
+  public static Bitmap read(java.io.InputStream in) throws IOException {
     BMPDecoder d = new BMPDecoder(in);
-    return d.getBufferedImage();
+    return d.getBitmap();
   }
   
   /**
@@ -553,7 +509,7 @@ public class BMPDecoder {
    * @since 0.7
    */
   public static BMPImage readExt(java.io.File file) throws IOException {
-	  java.io.FileInputStream fin = new java.io.FileInputStream(file);
+	  FileInputStream fin = new FileInputStream(file);
      try {
     	 return readExt(new BufferedInputStream(fin));    
      } finally {
@@ -570,9 +526,9 @@ public class BMPDecoder {
    * @return the decoded image read from the source file
    * @since 0.7
    */
-  public static BMPImage readExt(java.io.InputStream in) throws IOException {
+  public static BMPImage readExt(InputStream in) throws IOException {
     BMPDecoder d = new BMPDecoder(in);
-    BMPImage ret = new BMPImage(d.getBufferedImage(), d.getInfoHeader());
+    BMPImage ret = new BMPImage(d.getBitmap(), d.getInfoHeader());
     return ret;
   }
 }

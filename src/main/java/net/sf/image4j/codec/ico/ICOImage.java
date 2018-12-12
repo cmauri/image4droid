@@ -9,6 +9,8 @@
 
 package net.sf.image4j.codec.ico;
 
+import android.graphics.Bitmap;
+
 import net.sf.image4j.codec.bmp.InfoHeader;
 
 /**
@@ -28,8 +30,8 @@ public class ICOImage extends net.sf.image4j.codec.bmp.BMPImage {
    * @param infoHeader the BMP InfoHeader structure for the BMP encoded ICO image
    * @param iconEntry the IconEntry structure describing the ICO image
    */
-  public ICOImage(java.awt.image.BufferedImage image, net.sf.image4j.codec.bmp.InfoHeader infoHeader,
-      IconEntry iconEntry) {
+  public ICOImage(Bitmap image, net.sf.image4j.codec.bmp.InfoHeader infoHeader,
+                  IconEntry iconEntry) {
     super(image, infoHeader);
     this.iconEntry = iconEntry;
   }

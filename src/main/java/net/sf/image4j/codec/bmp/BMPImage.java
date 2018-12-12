@@ -9,6 +9,8 @@
 
 package net.sf.image4j.codec.bmp;
 
+import android.graphics.Bitmap;
+
 /**
  * Contains a decoded BMP image, as well as information about the source encoded image.
  * @since 0.7
@@ -17,14 +19,14 @@ package net.sf.image4j.codec.bmp;
 public class BMPImage {
   
   protected InfoHeader infoHeader;
-  protected java.awt.image.BufferedImage image;
+  protected Bitmap image;
   
   /**
    * Creates a new instance of BMPImage
    * @param image the decoded image
    * @param infoHeader the InfoHeader structure providing information about the source encoded image
    */
-  public BMPImage(java.awt.image.BufferedImage image, InfoHeader infoHeader) {
+  public BMPImage(Bitmap image, InfoHeader infoHeader) {
     this.image = image;
     this.infoHeader = infoHeader;
   }
@@ -46,14 +48,14 @@ public class BMPImage {
   /**
    * The decoded BMP image.
    */
-  public java.awt.image.BufferedImage getImage() {
+  public Bitmap getImage() {
     return image;
   }
   
   /**
    * Sets the image to be encoded.
    */
-  public void setImage(java.awt.image.BufferedImage image) {
+  public void setImage(Bitmap image) {
     this.image = image;
   }
   
@@ -101,6 +103,6 @@ public class BMPImage {
    * @since 0.7alpha2
    */
   public boolean isIndexed() {
-    return infoHeader == null ? false : infoHeader.sBitCount <= 8;
+    return infoHeader != null && infoHeader.sBitCount <= 8;
   }
 }
